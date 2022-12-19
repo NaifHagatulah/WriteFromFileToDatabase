@@ -10,17 +10,29 @@ public class WriteToDatabase
         string connectionString = "Host=localhost;Port=5432;Username=postgres;Password=?;Database=postgres;Trust Server Certificate=True";
         string directoryFile = "C:\\users\\adam\\desktop\\betapet-bot-api\\Betapet\\swe_wordlist.txt";   // directory to the file you want to read from
 
-        WriteFromFileToDatabase(connectionString, directoryFile);
+        HashSet<string> words = new HashSet<string>();
+
+        AddToHashSet(words, "C:\\users\\adam\\desktop\\betapet-bot-api\\Betapet\\swe_wordlist.txt");
+        AddToHashSet(words, "C:\\users\\adam\\desktop\\betapet-bot-api\\Betapet\\svenska-ord.txt");
+
+        WriteFromFileToDatabase(connectionString, words.ToList());
     }
 
-    public static void WriteFromFileToDatabase(string connectionString, string directoryToFile) 
+    private static void AddToHashSet(HashSet<string> set, string filePath)
     {
-        string swedish_words = @directoryToFile;
-        string words = File.ReadAllText(swedish_words);
-        string[] word_list = words.Split("\n");
+        string[] rows = File.ReadAllLines(filePath);
+
+        foreach(string row in rows)
+        {
+            set.Add(row.Trim().ToUpper());
+        }
+    }
+
+    public static void WriteFromFileToDatabase(string connectionString, List<string> words) 
+    {
         string query = "INSERT INTO lexicon(word, letter_value, a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, r, s, t, u, v, w, x, y, z, a1, a2, o2) VALUES (@word, @letter_value, @a, @b, @c, @d, @e, @f, @g, @h, @i, @j, @k, @l, @m, @n, @o, @p, @r, @s, @t, @u, @v, @w, @x, @y, @z, @a1, @a2, @o2)";
 
-        foreach (string word in word_list)
+        foreach (string word in words)
         {
             if (string.IsNullOrEmpty(word.Trim()))
                 continue;
